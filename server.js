@@ -22,6 +22,18 @@ function logger(req, res, next) {
   next();
 };
 
+async function validateUserId(req, res, next) {
+  const user = await User.getById(req.params.id);
+  if (user) {
+    req.user = user;
+    next();
+  } else {
+    res
+      .status(400)
+      .json({message: 'there is no user with that id'});
+  }
+}
+
 // API
 
 server.get('/api/users', (req, res) => {
@@ -33,7 +45,20 @@ server.get('/api/users', (req, res) => {
     .catch(err => {
       res
         .status(500)
-        .json({message: 'cannot get users'})
+        .json({message: 'cannot retrieve users'})
+    })
+})
+
+server.get('/api/users/:id', validateUserId, (req, res) => {
+  User
+    .getById(req.params.id)
+    .then(data => {
+      res.json(data);
+    })
+    .catch(err => {
+      res
+        .status(500)
+        .json({message: 'cannot retrieve that user'})
     })
 })
 
