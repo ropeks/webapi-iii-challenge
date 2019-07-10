@@ -109,9 +109,9 @@ server.post('/api/users', validateUser, async (req, res) => {
   }
 })
 
-server.post('/api/posts', validatePost, async (req, res) => {
+server.post('/api/users/:id/posts', validatePost, async (req, res) => {
   try {
-    const post = await Post.insert(req.body);
+    const post = await Post.insert({...req.body, user_id: req.params.id });
     res.status(200).json(post);
   } catch (error) {
     console.log(error);
