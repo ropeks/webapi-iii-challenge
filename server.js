@@ -1,5 +1,6 @@
 const express = require('express');
-const User = require("./users/userDb");
+const User = require('./users/userDb');
+const Post = require('./posts/postDb');
 
 const server = express();
 
@@ -36,8 +37,7 @@ async function validateUserId(req, res, next) {
 
 async function validateUser(req, res, next) {
   const { body } = req;
-  console.log(body);
-  if (body.length>0) {
+  if (Object.keys(body).length > 0) {
     if (body.name) {
       next();
     } else {
@@ -49,6 +49,23 @@ async function validateUser(req, res, next) {
     res
       .status(400)
       .json({message: "missing user data"});
+  }
+}
+
+async function validatePost(req, res, next) {
+  const { body } = req;
+  if (Object.keys(body).length > 0) {
+    if (body.text) {
+      next();
+    } else {
+      res
+        .status(400)
+        .json({message: "missing required text field"});
+    }
+  } else {
+    res
+      .status(400)
+      .json({message: "missing post data"});
   }
 }
 
@@ -84,10 +101,23 @@ server.post('/api/users', validateUser, async (req, res) => {
   try {
     const user = await User.insert(req.body);
     res.status(200).json(user);
-  } catch {
+  } catch (error) {
+    console.log(error);
     res
       .status(500)
       .json({message: 'cannot add new user'});
+  }
+})
+
+server.post('/api/posts', validatePost, async (req, res) => {
+  try {
+    const post = await Post.insert(req.body);
+    res.status(200).json(post);
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({message: 'cannot add new post'});
   }
 })
 
